@@ -14,8 +14,8 @@ A modern, secure, and scalable e-commerce frontend application built with **Next
 - **Product Catalog** - Browse thousands of products with advanced filtering
 - **Product Details** - Detailed product pages with image carousels and reviews
 - **Shopping Cart** - Full cart management with persistent state
-- **Checkout Flow** - Multi-step checkout with form validation
-- **Search & Filters** - Real-time product search and category filtering
+- **Checkout Flow** - Multi-step checkout with Zod schema validation
+- **Search & Filters** - Debounced real-time search and category filtering
 
 ### ⚡ **Performance & UX**
 
@@ -28,11 +28,13 @@ A modern, secure, and scalable e-commerce frontend application built with **Next
 ### 🔧 **Technical Excellence**
 
 - **TypeScript** - Full type safety throughout the application
-- **Redux Toolkit** - Predictable state management
-- **React Query** - Intelligent data fetching and caching
-- **Custom Hooks** - Reusable business logic
-- **Error Boundaries** - Graceful error handling
-- **Testing** - Comprehensive test coverage
+- **Redux Toolkit** - Predictable state management with persistence
+- **React Query** - Intelligent data fetching, caching, and optimistic updates
+- **Custom Hooks** - Reusable business logic (useCart, useForm, useFetchProducts)
+- **Zod Validation** - Runtime type checking and form validation
+- **Debounced Search** - Performance-optimized search with useDebounce hook
+- **Error Boundaries** - Graceful error handling and user feedback
+- **Testing** - Comprehensive test coverage with Jest and RTL
 
 ## 🏗️ **Tech Stack**
 
@@ -40,8 +42,9 @@ A modern, secure, and scalable e-commerce frontend application built with **Next
 | -------------------- | ---------------------------- |
 | **Framework**        | Next.js 15, React 19         |
 | **Language**         | TypeScript                   |
-| **State Management** | Redux Toolkit                |
+| **State Management** | Redux Toolkit, Redux Persist |
 | **Data Fetching**    | React Query (TanStack Query) |
+| **Validation**       | Zod Schema Validation        |
 | **Styling**          | Bootstrap 5, Custom CSS      |
 | **API**              | DummyJSON API                |
 | **Testing**          | Jest, React Testing Library  |
@@ -79,6 +82,101 @@ nextshop/
 ├── public/                    # Static assets
 ├── .github/workflows/         # CI/CD workflows
 └── tests/                     # Test files
+```
+
+## ⚙️ **Technical Implementation**
+
+### 🔄 **State Management Integration**
+
+**Redux Toolkit + React Query Architecture:**
+
+```typescript
+// Cart State (Client) - Redux Toolkit
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState: { items: [], total: 0 },
+  reducers: { addToCart, removeFromCart, updateQuantity },
+});
+
+// Server State - React Query
+const { data: products } = useQuery({
+  queryKey: ['products', filters],
+  queryFn: () => fetchProducts(filters),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+});
+```
+
+### 🛡️ **Zod Validation Integration**
+
+**Type-safe Form Validation:**
+
+```typescript
+// Validation Schema
+const checkoutSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  firstName: z.string().min(2, 'First name required'),
+  address: z.string().min(5, 'Address too short'),
+});
+
+// Custom Hook Integration
+const { values, errors, isValid } = useForm(checkoutSchema);
+```
+
+### ⚡ **Debounced Search Implementation**
+
+**Performance-Optimized Search:**
+
+```typescript
+// Custom useDebounce Hook
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+// Usage in Search Component
+const searchTerm = useDebounce(inputValue, 300);
+const { data: searchResults } = useQuery({
+  queryKey: ['search', searchTerm],
+  queryFn: () => searchProducts(searchTerm),
+  enabled: searchTerm.length > 2,
+});
+```
+
+### 🎣 **Custom Hooks Architecture**
+
+**Reusable Business Logic:**
+
+```typescript
+// useCart - Cart Management
+const useCart = () => ({
+  items: useAppSelector(selectCartItems),
+  addItem: (product) => dispatch(addToCart(product)),
+  total: useAppSelector(selectCartTotal),
+});
+
+// useFetchProducts - Product Data
+const useFetchProducts = (filters) =>
+  useQuery({
+    queryKey: ['products', filters],
+    queryFn: () => fetchProducts(filters),
+    select: (data) => normalizeProducts(data),
+  });
+
+// useForm - Form State & Validation
+const useForm = (schema) => ({
+  values,
+  errors,
+  touched,
+  handleChange,
+  handleBlur,
+  isValid,
+});
 ```
 
 ## 🚀 **Getting Started**
@@ -121,11 +219,17 @@ npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
 npm run type-check   # Run TypeScript compiler
+npm run validate     # Run Zod schema validation checks
 
 # Testing
 npm test             # Run tests
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
+npm run test:e2e     # Run end-to-end tests
+
+# Quality Assurance
+npm run pre-commit   # Run all quality checks
+npm run validate-schemas # Validate all Zod schemas
 
 # Deployment
 npm run docker:build # Build Docker image
@@ -281,10 +385,34 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ### Code Standards
 
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
-- **TypeScript** - Type checking
-- **Conventional Commits** - Commit message format
+- **ESLint** - Code linting with custom rules
+- **Prettier** - Code formatting consistency
+- **TypeScript** - Static type checking
+- **Zod** - Runtime validation and type inference
+- **Conventional Commits** - Semantic commit messages
+- **Husky** - Git hooks for quality gates
+
+### Quality Assurance
+
+**Pre-commit Checks:**
+
+```bash
+# Automated quality gates
+- TypeScript compilation ✓
+- ESLint code quality ✓
+- Prettier formatting ✓
+- Zod schema validation ✓
+- Unit test coverage ✓
+- Build success verification ✓
+```
+
+**Integration Testing:**
+
+- Redux state management testing
+- React Query hook testing
+- Form validation with Zod schemas
+- Custom hooks integration testing
+- Component interaction testing
 
 ## 📈 **Monitoring & Analytics**
 
@@ -322,19 +450,23 @@ const products = await fetch('https://dummyjson.com/products?limit=20&skip=0');
 ### Completed ✅
 
 - [x] Product catalog with SSR
-- [x] Shopping cart functionality
-- [x] Checkout flow
-- [x] Search and filtering
-- [x] Responsive design
-- [x] Testing setup
-- [x] CI/CD pipeline
+- [x] Shopping cart functionality with Redux Toolkit
+- [x] Checkout flow with Zod validation
+- [x] Debounced search and filtering
+- [x] React Query integration for server state
+- [x] Custom hooks architecture (useCart, useForm, useFetchProducts)
+- [x] Redux persistence and cross-tab synchronization
+- [x] Responsive design with Bootstrap 5
+- [x] Testing setup with Jest and RTL
+- [x] CI/CD pipeline with GitHub Actions
 
 ### In Progress 🚧
 
-- [ ] User authentication
-- [ ] Order history
-- [ ] Product reviews
-- [ ] Wishlist functionality
+- [ ] Error boundaries implementation
+- [ ] React.memo performance optimizations
+- [ ] Service worker for PWA features
+- [ ] User authentication with validation
+- [ ] Product reviews with Zod schemas
 
 ### Planned 📋
 
