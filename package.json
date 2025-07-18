@@ -2,6 +2,7 @@
   "name": "nextshop",
   "version": "0.1.0",
   "private": true,
+  "description": "A modern, secure, and scalable e-commerce frontend application built with Next.js 15, React 19, TypeScript, and Redux Toolkit.",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -20,6 +21,7 @@
     "@types/uuid": "^10.0.0",
     "axios": "^1.10.0",
     "bootstrap": "^5.3.7",
+    "bootstrap-icons": "^1.13.1",
     "next": "15.4.1",
     "react": "19.1.0",
     "react-bootstrap": "^2.10.10",
@@ -44,5 +46,9 @@
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
   }
 }

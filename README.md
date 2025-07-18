@@ -34,7 +34,7 @@ A modern, secure, and scalable e-commerce frontend application built with **Next
 - **Zod Validation** - Runtime type checking and form validation
 - **Debounced Search** - Performance-optimized search with useDebounce hook
 - **Error Boundaries** - Graceful error handling and user feedback
-- **Testing** - Comprehensive test coverage with Jest and RTL
+- **Testing** - Comprehensive test coverage with Jest and RTL(React Testing Library)
 
 ## 🏗️ **Tech Stack**
 
@@ -56,7 +56,7 @@ A modern, secure, and scalable e-commerce frontend application built with **Next
 ```
 nextshop/
 ├── src/
-│   ├── app/                    # App Router pages
+│   ├── app/                   # App Router pages
 │   │   ├── page.tsx           # Homepage
 │   │   ├── products/[id]/     # Product details
 │   │   ├── cart/              # Shopping cart
@@ -371,17 +371,7 @@ const securityHeaders = [
 ];
 ```
 
-## 🤝 **Contributing**
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+## Code Standards and Quality Assurance
 
 ### Code Standards
 
@@ -464,13 +454,12 @@ const products = await fetch('https://dummyjson.com/products?limit=20&skip=0');
 
 - [ ] Error boundaries implementation
 - [ ] React.memo performance optimizations
-- [ ] Service worker for PWA features
+- [ ] Service worker features
 - [ ] User authentication with validation
 - [ ] Product reviews with Zod schemas
 
 ### Planned 📋
 
-- [ ] PWA features
 - [ ] Real-time notifications
 - [ ] Advanced analytics
 - [ ] Multi-language support
@@ -482,7 +471,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 **Team**
 
-- **Lead Developer** - [Your Name](https://github.com/yourusername)
+- **Lead Developer** - [Wakidur Rahman](https://github.com/wakidur.rahman)
 - **UI/UX Designer** - [Designer Name](https://github.com/designer)
 - **DevOps Engineer** - [DevOps Name](https://github.com/devops)
 
@@ -492,14 +481,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Vercel](https://vercel.com/) for seamless deployment
 - [DummyJSON](https://dummyjson.com/) for the API
 - [Bootstrap Team](https://getbootstrap.com/) for the UI components
-
-## 📞 **Support**
-
-- **Documentation** - [Wiki](https://github.com/yourusername/nextshop/wiki)
-- **Issues** - [GitHub Issues](https://github.com/yourusername/nextshop/issues)
-- **Discussions** - [GitHub Discussions](https://github.com/yourusername/nextshop/discussions)
-- **Email** - support@nextshop.com
-
----
-
-**Built with ❤️ using Next.js and modern web technologies**

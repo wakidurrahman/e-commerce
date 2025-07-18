@@ -49,25 +49,23 @@ export default function Header() {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="mb-4">
       <Container>
-        <Link href="/" passHref legacyBehavior>
-          <Navbar.Brand>
-            <strong>NextShop</strong>
-          </Navbar.Brand>
-        </Link>
+        <Navbar.Brand as={Link} href="/">
+          <strong>NextShop</strong>
+        </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Link href="/" passHref legacyBehavior>
-              <Nav.Link>Home</Nav.Link>
-            </Link>
-            <Link href="/products" passHref legacyBehavior>
-              <Nav.Link>Products</Nav.Link>
-            </Link>
-            <Link href="/categories" passHref legacyBehavior>
-              <Nav.Link>Categories</Nav.Link>
-            </Link>
+            <Nav.Link as={Link} href="/">
+              Home
+            </Nav.Link>
+            <Nav.Link as={Link} href="/products">
+              Products
+            </Nav.Link>
+            <Nav.Link as={Link} href="/categories">
+              Categories
+            </Nav.Link>
           </Nav>
 
           {/* Search Form */}
@@ -88,22 +86,20 @@ export default function Header() {
 
           {/* Cart Link */}
           <Nav>
-            <Link href="/cart" passHref legacyBehavior>
-              <Nav.Link className="position-relative">
-                <i className="bi bi-cart3" style={{ fontSize: '1.5rem' }}></i>
-                {totalItems > 0 && (
-                  <Badge
-                    bg="danger"
-                    pill
-                    className="position-absolute top-0 start-100 translate-middle"
-                    style={{ fontSize: '0.7rem' }}
-                  >
-                    {totalItems > 99 ? '99+' : totalItems}
-                  </Badge>
-                )}
-                <span className="ms-1 d-none d-lg-inline">Cart</span>
-              </Nav.Link>
-            </Link>
+            <Nav.Link as={Link} href="/cart" className="position-relative">
+              <i className="bi bi-cart3" style={{ fontSize: '1.5rem' }}></i>
+              {totalItems > 0 && (
+                <Badge
+                  bg="danger"
+                  pill
+                  className="position-absolute top-0 start-100 translate-middle"
+                  style={{ fontSize: '0.7rem' }}
+                >
+                  {totalItems > 99 ? '99+' : totalItems}
+                </Badge>
+              )}
+              <span className="ms-1 d-none d-lg-inline">Cart</span>
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
