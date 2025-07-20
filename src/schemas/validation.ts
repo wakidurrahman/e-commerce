@@ -50,7 +50,7 @@ export const shippingInfoSchema = z.object({
       'Please enter a valid ZIP code (e.g., 12345 or 12345-6789)'
     ),
 
-  country: z.string().min(1, 'Country is required').default('United States'),
+  country: z.string().min(1, 'Country is required'),
 });
 
 // Payment Information Schema
@@ -106,7 +106,7 @@ export const paymentInfoSchema = z.object({
 export const checkoutFormSchema = shippingInfoSchema
   .merge(paymentInfoSchema)
   .extend({
-    sameAsBilling: z.boolean().default(true),
+    sameAsBilling: z.boolean(),
   });
 
 // Contact/Support Form Schema
