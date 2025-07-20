@@ -1,8 +1,8 @@
 'use client';
 
 import { useCart } from '@/hooks/useCart';
-import { useForm, validationRules } from '@/hooks/useForm';
-import { CheckoutFormData } from '@/schemas/validation';
+import { CheckoutFormData, checkoutFormSchema } from '@/schemas/validation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
@@ -63,73 +63,21 @@ export default function CheckoutPage() {
   const tax = totalPrice * 0.08; // 8% tax
   const finalTotal = totalPrice + shippingCost + tax;
 
-  const formValidationRules = {
-    firstName: [
-      validationRules.required<CheckoutFormData>('First name is required'),
-    ],
-    lastName: [
-      validationRules.required<CheckoutFormData>('Last name is required'),
-    ],
-    email: [
-      validationRules.required<CheckoutFormData>('Email is required'),
-      validationRules.email<CheckoutFormData>('Please enter a valid email'),
-    ],
-    phone: [
-      validationRules.required<CheckoutFormData>('Phone number is required'),
-      validationRules.phone<CheckoutFormData>(
-        'Please enter a valid phone number'
-      ),
-    ],
-    address: [
-      validationRules.required<CheckoutFormData>('Address is required'),
-    ],
-    city: [validationRules.required<CheckoutFormData>('City is required')],
-    state: [validationRules.required<CheckoutFormData>('State is required')],
-    zipCode: [
-      validationRules.required<CheckoutFormData>('ZIP code is required'),
-      validationRules.pattern<CheckoutFormData>(
-        /^\d{5}(-\d{4})?$/,
-        'Please enter a valid ZIP code'
-      ),
-    ],
-    cardNumber: [
-      validationRules.required<CheckoutFormData>('Card number is required'),
-      validationRules.pattern<CheckoutFormData>(
-        /^\d{4}\s?\d{4}\s?\d{4}\s?\d{4}$/,
-        'Please enter a valid card number'
-      ),
-    ],
-    expiryDate: [
-      validationRules.required<CheckoutFormData>('Expiry date is required'),
-      validationRules.pattern<CheckoutFormData>(
-        /^(0[1-9]|1[0-2])\/\d{2}$/,
-        'Please enter a valid expiry date (MM/YY)'
-      ),
-    ],
-    cvv: [
-      validationRules.required<CheckoutFormData>('CVV is required'),
-      validationRules.pattern<CheckoutFormData>(
-        /^\d{3,4}$/,
-        'Please enter a valid CVV'
-      ),
-    ],
-    cardholderName: [
-      validationRules.required<CheckoutFormData>('Cardholder name is required'),
-    ],
-  };
-
   const {
-    values,
-    errors,
-    isValid,
-    handleChange,
+    register,
     handleSubmit,
-    getFieldProps,
-    setFieldError,
+    formState: { errors, isValid },
+    watch,
+    setValue,
+    trigger,
+    getValues,
   } = useForm<CheckoutFormData>({
-    initialValues: initialFormData,
-    validationRules: formValidationRules,
+    resolver: zodResolver(checkoutFormSchema),
+    defaultValues: initialFormData,
+    mode: 'onChange',
   });
+
+  const watchedValues = watch();
 
   // Redirect to cart if empty
   useEffect(() => {
@@ -138,8 +86,8 @@ export default function CheckoutPage() {
     }
   }, [totalItems, orderPlaced, router]);
 
-  const validateCurrentStep = (): boolean => {
-    switch (currentStep) {
+  const validateStep = (step: number): boolean => {
+    switch (step) {
       case 1:
         return totalItems > 0;
       case 2:
@@ -152,45 +100,37 @@ export default function CheckoutPage() {
           'city',
           'state',
           'zipCode',
-        ].every(
-          (field) => values[field as keyof CheckoutFormData] && !errors[field]
-        );
+        ].every((field) => {
+          const fieldKey = field as keyof CheckoutFormData;
+          return watchedValues[fieldKey] && !errors[fieldKey];
+        });
       case 3:
         return ['cardNumber', 'expiryDate', 'cvv', 'cardholderName'].every(
-          (field) => values[field as keyof CheckoutFormData] && !errors[field]
+          (field) => {
+            const fieldKey = field as keyof CheckoutFormData;
+            return watchedValues[fieldKey] && !errors[fieldKey];
+          }
         );
       default:
         return true;
     }
   };
 
-  const handleNextStep = () => {
-    if (validateCurrentStep() && currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+  const handleFormSubmit = handleSubmit(async (data) => {
+    if (!cart?.items?.length) return;
 
-  const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handlePlaceOrder = handleSubmit(async (formData) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
+      // Simulate payment processing
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const newOrderId = `ORDER-${Date.now()}-${uuidv4()
-        .slice(0, 8)
-        .toUpperCase()}`;
+      const newOrderId = uuidv4().slice(0, 8).toUpperCase();
       setOrderId(newOrderId);
       setOrderPlaced(true);
       clearCart();
       setCurrentStep(4);
     } catch (error) {
-      setFieldError('cardNumber', 'Payment failed. Please try again.');
+      console.error('Payment failed:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -205,7 +145,7 @@ export default function CheckoutPage() {
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCardNumber(e.target.value);
     if (formatted.replace(/\s/g, '').length <= 16) {
-      handleChange('cardNumber', formatted);
+      setValue('cardNumber', formatted);
     }
   };
 
@@ -214,7 +154,27 @@ export default function CheckoutPage() {
     if (value.length >= 2) {
       value = value.slice(0, 2) + '/' + value.slice(2, 4);
     }
-    handleChange('expiryDate', value);
+    setValue('expiryDate', value);
+  };
+
+  const handleNextStep = async () => {
+    if (currentStep < 4) {
+      // Only validate form fields for steps that have forms (steps 2 & 3)
+      if (currentStep > 1) {
+        const isStepValid = await trigger();
+        if (!isStepValid) return;
+      }
+
+      if (validateStep(currentStep)) {
+        setCurrentStep(currentStep + 1);
+      }
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   const renderStepContent = () => {
@@ -284,6 +244,7 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>First Name *</Form.Label>
                       <Form.Control
+                        {...register('firstName')}
                         type="text"
                         name="firstName"
                         value={values.firstName}
@@ -293,7 +254,7 @@ export default function CheckoutPage() {
                         isInvalid={!!errors.firstName}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.firstName}
+                        {errors.firstName?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -301,12 +262,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>Last Name *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('lastName')}
+                        {...register('lastName')}
                         type="text"
                         isInvalid={!!errors.lastName}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.lastName}
+                        {errors.lastName?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -317,12 +278,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>Email *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('email')}
+                        {...register('email')}
                         type="email"
                         isInvalid={!!errors.email}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.email}
+                        {errors.email?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -330,12 +291,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>Phone Number *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('phone')}
+                        {...register('phone')}
                         type="tel"
                         isInvalid={!!errors.phone}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.phone}
+                        {errors.phone?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -344,12 +305,12 @@ export default function CheckoutPage() {
                 <Form.Group className="mb-3">
                   <Form.Label>Address *</Form.Label>
                   <Form.Control
-                    {...getFieldProps('address')}
+                    {...register('address')}
                     type="text"
                     isInvalid={!!errors.address}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.address}
+                    {errors.address?.message}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -358,12 +319,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>City *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('city')}
+                        {...register('city')}
                         type="text"
                         isInvalid={!!errors.city}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.city}
+                        {errors.city?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -371,12 +332,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>State *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('state')}
+                        {...register('state')}
                         type="text"
                         isInvalid={!!errors.state}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.state}
+                        {errors.state?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -384,12 +345,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>ZIP Code *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('zipCode')}
+                        {...register('zipCode')}
                         type="text"
                         isInvalid={!!errors.zipCode}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.zipCode}
+                        {errors.zipCode?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -416,12 +377,9 @@ export default function CheckoutPage() {
                       label="Credit Card"
                       name="paymentMethod"
                       value="credit"
-                      checked={values.paymentMethod === 'credit'}
+                      checked={watchedValues.paymentMethod === 'credit'}
                       onChange={(e) =>
-                        handleChange(
-                          'paymentMethod',
-                          e.target.value as 'credit'
-                        )
+                        setValue('paymentMethod', e.target.value as 'credit')
                       }
                     />
                     <Form.Check
@@ -430,9 +388,9 @@ export default function CheckoutPage() {
                       label="Debit Card"
                       name="paymentMethod"
                       value="debit"
-                      checked={values.paymentMethod === 'debit'}
+                      checked={watchedValues.paymentMethod === 'debit'}
                       onChange={(e) =>
-                        handleChange('paymentMethod', e.target.value as 'debit')
+                        setValue('paymentMethod', e.target.value as 'debit')
                       }
                     />
                   </div>
@@ -443,12 +401,12 @@ export default function CheckoutPage() {
                   <Form.Control
                     type="text"
                     placeholder="1234 5678 9012 3456"
-                    value={values.cardNumber}
+                    value={watchedValues.cardNumber}
                     onChange={handleCardNumberChange}
                     isInvalid={!!errors.cardNumber}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.cardNumber}
+                    {errors.cardNumber?.message}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -459,12 +417,12 @@ export default function CheckoutPage() {
                       <Form.Control
                         type="text"
                         placeholder="MM/YY"
-                        value={values.expiryDate}
+                        value={watchedValues.expiryDate}
                         onChange={handleExpiryChange}
                         isInvalid={!!errors.expiryDate}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.expiryDate}
+                        {errors.expiryDate?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -472,14 +430,14 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>CVV *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('cvv')}
+                        {...register('cvv')}
                         type="text"
                         placeholder="123"
                         maxLength={4}
                         isInvalid={!!errors.cvv}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.cvv}
+                        {errors.cvv?.message}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -488,12 +446,12 @@ export default function CheckoutPage() {
                 <Form.Group className="mb-3">
                   <Form.Label>Cardholder Name *</Form.Label>
                   <Form.Control
-                    {...getFieldProps('cardholderName')}
+                    {...register('cardholderName')}
                     type="text"
                     isInvalid={!!errors.cardholderName}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {errors.cardholderName}
+                    {errors.cardholderName?.message}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -533,7 +491,7 @@ export default function CheckoutPage() {
                 </p>
                 <hr />
                 <p className="small text-muted">
-                  A confirmation email has been sent to {values.email}
+                  A confirmation email has been sent to {watchedValues.email}
                 </p>
               </Card.Body>
             </Card>
@@ -654,16 +612,17 @@ export default function CheckoutPage() {
                     <Button
                       variant="success"
                       size="lg"
-                      onClick={handlePlaceOrder}
-                      disabled={!validateCurrentStep() || isSubmitting}
+                      onClick={handleFormSubmit}
+                      disabled={!validateStep(currentStep) || isSubmitting}
                     >
                       {isSubmitting ? (
                         <>
                           <span
                             className="spinner-border spinner-border-sm me-2"
                             role="status"
+                            aria-hidden="true"
                           ></span>
-                          Processing...
+                          Processing Order...
                         </>
                       ) : (
                         'Place Order'
@@ -674,7 +633,7 @@ export default function CheckoutPage() {
                       variant="primary"
                       size="lg"
                       onClick={handleNextStep}
-                      disabled={!validateCurrentStep()}
+                      disabled={!validateStep(currentStep)}
                     >
                       Continue
                     </Button>

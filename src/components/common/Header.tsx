@@ -19,21 +19,13 @@ export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getTotalItems } = useCart();
-  const [totalItems, setTotalItems] = useState(0);
-  const [isClient, setIsClient] = useState(false);
+  const totalItems = getTotalItems();
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Hydration guard to prevent SSR/client mismatch
+  // Prevent hydration mismatch by ensuring client renders same as server initially
   useEffect(() => {
-    setIsClient(true);
-    setTotalItems(getTotalItems());
-  }, [getTotalItems]);
-
-  // Update total items when cart changes
-  useEffect(() => {
-    if (isClient) {
-      setTotalItems(getTotalItems());
-    }
-  }, [getTotalItems, isClient]);
+    setIsMounted(true);
+  }, []);
 
   // Initialize search with current query parameter
   const initialQuery = searchParams.get('q') || '';
@@ -102,7 +94,7 @@ export default function Header() {
           <Nav>
             <Nav.Link as={Link} href="/cart" className="position-relative">
               <i className="bi bi-cart3" style={{ fontSize: '1.5rem' }}></i>
-              {totalItems > 0 && (
+              {isMounted && totalItems > 0 && (
                 <Badge
                   bg="danger"
                   pill
