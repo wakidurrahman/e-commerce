@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from '@/hooks/useCart';
+import { useForm, validationRules } from '@/hooks/useForm';
 import { CheckoutFormData } from '@/schemas/validation';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -18,7 +19,6 @@ import {
   ProgressBar,
   Row,
 } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 
 // Using CheckoutFormData from schemas/validation.ts
@@ -64,45 +64,58 @@ export default function CheckoutPage() {
   const finalTotal = totalPrice + shippingCost + tax;
 
   const formValidationRules = {
-    firstName: [validationRules.required('First name is required')],
-    lastName: [validationRules.required('Last name is required')],
+    firstName: [
+      validationRules.required<CheckoutFormData>('First name is required'),
+    ],
+    lastName: [
+      validationRules.required<CheckoutFormData>('Last name is required'),
+    ],
     email: [
-      validationRules.required('Email is required'),
-      validationRules.email('Please enter a valid email'),
+      validationRules.required<CheckoutFormData>('Email is required'),
+      validationRules.email<CheckoutFormData>('Please enter a valid email'),
     ],
     phone: [
-      validationRules.required('Phone number is required'),
-      validationRules.phone('Please enter a valid phone number'),
+      validationRules.required<CheckoutFormData>('Phone number is required'),
+      validationRules.phone<CheckoutFormData>(
+        'Please enter a valid phone number'
+      ),
     ],
-    address: [validationRules.required('Address is required')],
-    city: [validationRules.required('City is required')],
-    state: [validationRules.required('State is required')],
+    address: [
+      validationRules.required<CheckoutFormData>('Address is required'),
+    ],
+    city: [validationRules.required<CheckoutFormData>('City is required')],
+    state: [validationRules.required<CheckoutFormData>('State is required')],
     zipCode: [
-      validationRules.required('ZIP code is required'),
-      validationRules.pattern(
+      validationRules.required<CheckoutFormData>('ZIP code is required'),
+      validationRules.pattern<CheckoutFormData>(
         /^\d{5}(-\d{4})?$/,
         'Please enter a valid ZIP code'
       ),
     ],
     cardNumber: [
-      validationRules.required('Card number is required'),
-      validationRules.pattern(
+      validationRules.required<CheckoutFormData>('Card number is required'),
+      validationRules.pattern<CheckoutFormData>(
         /^\d{4}\s?\d{4}\s?\d{4}\s?\d{4}$/,
         'Please enter a valid card number'
       ),
     ],
     expiryDate: [
-      validationRules.required('Expiry date is required'),
-      validationRules.pattern(
+      validationRules.required<CheckoutFormData>('Expiry date is required'),
+      validationRules.pattern<CheckoutFormData>(
         /^(0[1-9]|1[0-2])\/\d{2}$/,
         'Please enter a valid expiry date (MM/YY)'
       ),
     ],
     cvv: [
-      validationRules.required('CVV is required'),
-      validationRules.pattern(/^\d{3,4}$/, 'Please enter a valid CVV'),
+      validationRules.required<CheckoutFormData>('CVV is required'),
+      validationRules.pattern<CheckoutFormData>(
+        /^\d{3,4}$/,
+        'Please enter a valid CVV'
+      ),
     ],
-    cardholderName: [validationRules.required('Cardholder name is required')],
+    cardholderName: [
+      validationRules.required<CheckoutFormData>('Cardholder name is required'),
+    ],
   };
 
   const {
@@ -271,8 +284,12 @@ export default function CheckoutPage() {
                     <Form.Group className="mb-3">
                       <Form.Label>First Name *</Form.Label>
                       <Form.Control
-                        {...getFieldProps('firstName')}
                         type="text"
+                        name="firstName"
+                        value={values.firstName}
+                        onChange={(e) =>
+                          handleChange('firstName', e.target.value)
+                        }
                         isInvalid={!!errors.firstName}
                       />
                       <Form.Control.Feedback type="invalid">

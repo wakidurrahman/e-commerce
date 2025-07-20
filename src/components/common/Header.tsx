@@ -4,7 +4,7 @@ import { useCart } from '@/hooks/useCart';
 import { useDebouncedSearch } from '@/hooks/useDebounce';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Badge,
   Button,
@@ -19,7 +19,21 @@ export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getTotalItems } = useCart();
-  const totalItems = getTotalItems();
+  const [totalItems, setTotalItems] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
+  // Hydration guard to prevent SSR/client mismatch
+  useEffect(() => {
+    setIsClient(true);
+    setTotalItems(getTotalItems());
+  }, [getTotalItems]);
+
+  // Update total items when cart changes
+  useEffect(() => {
+    if (isClient) {
+      setTotalItems(getTotalItems());
+    }
+  }, [getTotalItems, isClient]);
 
   // Initialize search with current query parameter
   const initialQuery = searchParams.get('q') || '';
