@@ -4,7 +4,7 @@ import { useCart } from '@/hooks/useCart';
 import { useDebouncedSearch } from '@/hooks/useDebounce';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Badge,
   Button,
@@ -20,6 +20,12 @@ export default function Header() {
   const searchParams = useSearchParams();
   const { getTotalItems } = useCart();
   const totalItems = getTotalItems();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Prevent hydration mismatch by ensuring client renders same as server initially
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Initialize search with current query parameter
   const initialQuery = searchParams.get('q') || '';
@@ -88,7 +94,7 @@ export default function Header() {
           <Nav>
             <Nav.Link as={Link} href="/cart" className="position-relative">
               <i className="bi bi-cart3" style={{ fontSize: '1.5rem' }}></i>
-              {totalItems > 0 && (
+              {isMounted && totalItems > 0 && (
                 <Badge
                   bg="danger"
                   pill
