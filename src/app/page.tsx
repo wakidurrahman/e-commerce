@@ -7,6 +7,10 @@ import { PaginationParams } from '@/types';
 import { useState } from 'react';
 import { Alert, Button, Col, Container, Form, Row } from 'react-bootstrap';
 
+// 🏗️ Hybrid Architecture: SSR + Client Interactions
+// ├── 🖥️  SSR: Initial page render (SEO, performance)
+// └── 💻 CSR: User interactions (filters, sorting, pagination)
+
 export default function HomePage() {
   const [filters, setFilters] = useState<PaginationParams>({
     page: 1,
