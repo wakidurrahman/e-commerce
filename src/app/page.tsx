@@ -2,7 +2,10 @@
 
 import { ProductGridSkeleton } from '@/components/common/LoadingSkeleton';
 import ProductCard from '@/components/product/ProductCard';
-import { useFetchCategories, useFetchProducts } from '@/hooks/useFetchProducts';
+import {
+  useFetchProducts,
+  useFetchProductsList,
+} from '@/hooks/useFetchProducts';
 import { PaginationParams } from '@/types';
 import { useState } from 'react';
 import { Alert, Button, Col, Container, Form, Row } from 'react-bootstrap';
@@ -35,7 +38,9 @@ export default function HomePage() {
 
   // Fetch categories for filter dropdown
   const { data: categories = [], isLoading: categoriesLoading } =
-    useFetchCategories();
+    useFetchProductsList();
+
+  console.log(categories);
 
   const handleSortChange = (sortBy: string, order: 'asc' | 'desc') => {
     setFilters((prev) => ({ ...prev, sortBy, order, page: 1 }));

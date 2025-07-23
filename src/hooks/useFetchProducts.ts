@@ -80,6 +80,16 @@ export const useFetchCategories = (enabled: boolean = true) => {
     gcTime: 60 * 60 * 1000, // 1 hour
   });
 };
+// Hook for fetching product categories
+export const useFetchProductsList = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['productsList'],
+    queryFn: productApi.getProductsList,
+    enabled,
+    staleTime: 30 * 60 * 1000, // 30 minutes (categories don't change often)
+    gcTime: 60 * 60 * 1000, // 1 hour
+  });
+};
 
 // Hook for searching products
 export const useSearchProducts = (

@@ -1,4 +1,4 @@
-import { PaginationParams, Product, ProductsResponse } from '@/types';
+import { Category, PaginationParams, Product, ProductsResponse } from '@/types';
 import axios, { AxiosResponse } from 'axios';
 
 // Create axios instance with base configuration
@@ -114,7 +114,13 @@ export const productApi = {
   },
 
   // Get all product categories
-  getCategories: async (): Promise<string[]> => {
+  getCategories: async (): Promise<Category[]> => {
+    const response = await api.get<Category[]>('/products/categories');
+    return response.data;
+  },
+
+  // Get all product list
+  getProductsList: async (): Promise<string[]> => {
     const response = await api.get<string[]>('/products/category-list');
     return response.data;
   },

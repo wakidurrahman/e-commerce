@@ -33,6 +33,12 @@ export interface Product {
   thumbnail: string;
 }
 
+export interface Category {
+  slug: string;
+  name: string;
+  url: string;
+}
+
 export interface Review {
   rating: number;
   comment: string;

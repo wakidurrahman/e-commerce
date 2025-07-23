@@ -10,7 +10,7 @@ export default function Footer() {
         <Row>
           <Col md={4} className="mb-3">
             <h5>NextShop</h5>
-            <p className="text-muted">
+            <p className="text-white">
               Your one-stop destination for quality products at great prices.
               Discover amazing deals and fast shipping on thousands of items.
             </p>
@@ -22,7 +22,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/products"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   All Products
                 </Link>
@@ -30,13 +30,13 @@ export default function Footer() {
               <li>
                 <Link
                   href="/categories"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Categories
                 </Link>
               </li>
               <li>
-                <Link href="/deals" className="text-muted text-decoration-none">
+                <Link href="/deals" className="text-white text-decoration-none">
                   Deals
                 </Link>
               </li>
@@ -47,14 +47,14 @@ export default function Footer() {
             <h6>Customer Service</h6>
             <ul className="list-unstyled">
               <li>
-                <Link href="/help" className="text-muted text-decoration-none">
+                <Link href="/help" className="text-white text-decoration-none">
                   Help Center
                 </Link>
               </li>
               <li>
                 <Link
                   href="/returns"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Returns
                 </Link>
@@ -62,7 +62,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/shipping"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Shipping Info
                 </Link>
@@ -70,7 +70,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Contact Us
                 </Link>
@@ -82,14 +82,14 @@ export default function Footer() {
             <h6>Account</h6>
             <ul className="list-unstyled">
               <li>
-                <Link href="/login" className="text-muted text-decoration-none">
+                <Link href="/login" className="text-white text-decoration-none">
                   Sign In
                 </Link>
               </li>
               <li>
                 <Link
                   href="/register"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Create Account
                 </Link>
@@ -97,7 +97,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/account"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   My Account
                 </Link>
@@ -105,7 +105,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/orders"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Order History
                 </Link>
@@ -117,14 +117,14 @@ export default function Footer() {
             <h6>Company</h6>
             <ul className="list-unstyled">
               <li>
-                <Link href="/about" className="text-muted text-decoration-none">
+                <Link href="/about" className="text-white text-decoration-none">
                   About Us
                 </Link>
               </li>
               <li>
                 <Link
                   href="/careers"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Careers
                 </Link>
@@ -132,13 +132,13 @@ export default function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-muted text-decoration-none"
+                  className="text-white text-decoration-none"
                 >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted text-decoration-none">
+                <Link href="/terms" className="text-white text-decoration-none">
                   Terms of Service
                 </Link>
               </li>
@@ -150,28 +150,28 @@ export default function Footer() {
 
         <Row className="align-items-center">
           <Col md={6}>
-            <p className="mb-0 text-muted">
+            <p className="mb-0 text-white">
               © {currentYear} NextShop. All rights reserved.
             </p>
           </Col>
           <Col md={6} className="text-md-end">
             <div className="d-flex justify-content-md-end gap-3">
-              <a href="#" className="text-muted">
+              <a href="#" className="text-white">
                 <i
                   className="bi bi-facebook"
                   style={{ fontSize: '1.5rem' }}
                 ></i>
               </a>
-              <a href="#" className="text-muted">
+              <a href="#" className="text-white">
                 <i className="bi bi-twitter" style={{ fontSize: '1.5rem' }}></i>
               </a>
-              <a href="#" className="text-muted">
+              <a href="#" className="text-white">
                 <i
                   className="bi bi-instagram"
                   style={{ fontSize: '1.5rem' }}
                 ></i>
               </a>
-              <a href="#" className="text-muted">
+              <a href="#" className="text-white">
                 <i
                   className="bi bi-linkedin"
                   style={{ fontSize: '1.5rem' }}
